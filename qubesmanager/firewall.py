@@ -223,10 +223,10 @@ class QubesFirewallRulesModel(QtCore.QAbstractItemModel):
         allow_icmp = False
         common_action = None
 
-        reversed_rules = list(reversed(vm.firewall.rules))
-        last_rule = reversed_rules.pop(0)
+        reversed_rules = reversed(vm.firewall.rules)
+        last_rule = next(reversed_rules, None)
 
-        if last_rule == qubesadmin.firewall.Rule('action=accept') \
+        if last_rule is not None and last_rule == qubesadmin.firewall.Rule('action=accept') \
                 or last_rule == qubesadmin.firewall.Rule('action=drop'):
             common_action = last_rule.action
         else:
@@ -237,9 +237,7 @@ class QubesFirewallRulesModel(QtCore.QAbstractItemModel):
                                         action='accept', specialtarget='dns')
         icmp_rule = qubesadmin.firewall.Rule(None,
                                         action='accept', proto='icmp')
-        while reversed_rules:
-            rule = reversed_rules.pop(0)
-
+        for rule in reversed_rules:
             if rule == dns_rule:
                 allow_dns = True
                 continue
